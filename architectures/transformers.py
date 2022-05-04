@@ -611,7 +611,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
         tokens, None, training=training, ret_list=True)
     x = self.output_ln(tokens)
 
-    print("Shape of output:", x.shape)
+    tf.print(f"Shape of final hidden states:", x.shape)
+    tf.print(f"First values of final hidden states:", x[0,:3,:3])
 
     return (x, x_list) if ret_list else x
 
