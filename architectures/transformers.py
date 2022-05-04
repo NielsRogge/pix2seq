@@ -591,6 +591,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
 
     tf.print("Shape after position embeddings", tokens.shape)
     tf.print("First values after position embeddings", tokens[0, :3, :3])
+    tf.print("Last values after position embeddings:", tokens[0,-3:,:3:])
+    tf.print("Sum after position embeddings", tokens.sum())
 
     if self.use_cls_token:
       cls_token = tf.tile(tf.expand_dims(self.cls_token_emb, 0), [bsz, 1, 1])
