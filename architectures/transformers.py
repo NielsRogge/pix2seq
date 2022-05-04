@@ -132,7 +132,7 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
                     name_prefix=None, initializer=None):
   """Add vis_pos_emb variable/tensor to model instance referenced by `self`."""
   
-  print("Position embedding:", pos_encoding)
+  tf.print("Position embedding:", pos_encoding)
   
   if name_prefix is None:
     name_prefix = self.name
@@ -581,13 +581,17 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
     bsz, h, w, dim = get_shape(tokens)
     tokens = self.stem_ln(tf.reshape(tokens, [bsz, h * w, dim]))
 
-    tf.print("Shape of after layer norm", tokens.shape)
+    tf.print("Shape of embeddings after layer norm", tokens.shape)
     tf.print("First values after layer norm", tokens[0, :3, :3])
 
     tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
     tf.print("Shape of position embeddings", self.vis_pos_emb[:3,:3])
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
+
+    tf.print("Shape after position embeddings", tokens.shape)
+    tf.print("First values after position embeddings", tokens[0, :3, :3])
+
     if self.use_cls_token:
       cls_token = tf.tile(tf.expand_dims(self.cls_token_emb, 0), [bsz, 1, 1])
       tokens = tf.concat([cls_token, tokens], 1)
