@@ -557,6 +557,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
 
   def call(self, images, training, ret_list=False):
     """Input images of (bsz, h, w, c)."""
+    print("Shape of images:", images.shape)
+
     tokens = self.stem_conv(images)
     bsz, h, w, dim = get_shape(tokens)
     tokens = self.stem_ln(tf.reshape(tokens, [bsz, h * w, dim]))
@@ -569,6 +571,9 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
     tokens, x_list = self.transformer_encoder(
         tokens, None, training=training, ret_list=True)
     x = self.output_ln(tokens)
+
+    print("Shape of output:", x.shape)
+
     return (x, x_list) if ret_list else x
 
 
