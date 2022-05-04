@@ -447,7 +447,14 @@ class TransformerEncoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
   def call(self, x, mask, training, ret_list=False):
     x_list = [x]
     for i in range(self.num_layers):
+      if i == 0:
+          tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
+
       x = self.enc_layers[i](x, mask, training)
+
+      if i == 0:
+          tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
+
       x_list.append(x)
     return (x, x_list) if ret_list else x
 
