@@ -143,6 +143,8 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
     sin_cos = get_2d_position_codes(
         n_rows, n_cols, dim, normalization_max=6.2831852)
     
+    print("we are here")
+    
     tf.print("Shape of sin_cos", sin_cos.shape)
     tf.print("First values of sin_cos", sin_cos[0, 0, 0, :3])
     
@@ -574,6 +576,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
 
     tf.print("Shape of after layer norm", tokens.shape)
     tf.print("First values after layer norm", tokens[0, :3, :3])
+
+    tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
     if self.use_cls_token:
