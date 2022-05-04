@@ -131,6 +131,9 @@ def add_seq_pos_emb(self, pos_encoding, max_seq_len, dim,
 def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
                     name_prefix=None, initializer=None):
   """Add vis_pos_emb variable/tensor to model instance referenced by `self`."""
+  
+  print("Position embedding:", pos_encoding)
+  
   if name_prefix is None:
     name_prefix = self.name
   if initializer is None:
