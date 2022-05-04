@@ -568,8 +568,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
     bsz, h, w, dim = get_shape(tokens)
     tokens = self.stem_ln(tf.reshape(tokens, [bsz, h * w, dim]))
 
-    #tf.print("Shape of after layer norm", tokens.shape)
-    #tf.print("First values after layer norm", tokens[0, :3, :3])
+    tf.print("Shape of after layer norm", tokens.shape)
+    tf.print("First values after layer norm", tokens[0, :3, :3])
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
     if self.use_cls_token:
