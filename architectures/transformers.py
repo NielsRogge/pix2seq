@@ -142,6 +142,10 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
   elif pos_encoding == 'sin_cos':
     sin_cos = get_2d_position_codes(
         n_rows, n_cols, dim, normalization_max=6.2831852)
+    
+    tf.print("Shape of sin_cos", sin_cos.shape)
+    tf.print("First values of sin_cos", sin_cos[0, 0, 0, :3])
+    
     self.vis_pos_emb = tf.reshape(sin_cos, [n_rows * n_cols, dim])
   else:
     raise ValueError('Unknown pos encoding %s' % pos_encoding)
