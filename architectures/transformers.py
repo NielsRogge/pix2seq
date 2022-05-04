@@ -561,14 +561,14 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
 
     tokens = self.stem_conv(images)
 
-    tf.print(f"Shape of patch embeddings: {tokens.shape}")
-    tf.print(tokens[0, 0, :3, :3], "test")
+    tf.print("Shape of patch embeddings", tokens.shape)
+    tf.print("First values of patch embeddings", tokens[0, 0, :3, :3])
 
     bsz, h, w, dim = get_shape(tokens)
     tokens = self.stem_ln(tf.reshape(tokens, [bsz, h * w, dim]))
 
-    #tf.print(f"Shape after layer norm: {tokens.shape}")
-    #tf.print(f"First values after layer norm: {tokens[0, :3, :3]}")
+    tf.print("Shape of after layer norm", tokens.shape)
+    tf.print("First values after layer norm", tokens[0, :3, :3])
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
     if self.use_cls_token:
