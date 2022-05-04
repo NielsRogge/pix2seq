@@ -560,8 +560,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
     tf.print("Shape of pixel values", images.shape)
     tf.print("First values of pixel values", images[0, 0, 0, :3])
 
-    tf.print("Shape of kernel of stem layer:", self.stem_conv.kernel.shape)
-    tf.print("Kernel of stem layer:", self.stem_conv.kernel[0,0,:3,:3])
+    tf.print("Shape of kernel of stem layer:", self.stem_conv.get_weights().shape)
+    tf.print("Kernel of stem layer:", self.stem_conv.get_weights()[0,0,:3,:3])
 
     tokens = self.stem_conv(images)
 
