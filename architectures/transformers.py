@@ -139,6 +139,8 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
   if initializer is None:
     initializer = get_variable_initializer()
   if pos_encoding == 'learned':
+    tf.print("we are using learned")
+    
     self.vis_pos_emb = self.add_weight(
         shape=(n_rows * n_cols, dim), initializer=initializer,
         name='%s/vis_pos_embedding' % name_prefix)
@@ -146,7 +148,7 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
     sin_cos = get_2d_position_codes(
         n_rows, n_cols, dim, normalization_max=6.2831852)
     
-    print("we are here")
+    tf.print("we are using sin/cos")
     
     tf.print("Shape of sin_cos", sin_cos.shape)
     tf.print("First values of sin_cos", sin_cos[0, 0, 0, :3])
@@ -154,6 +156,8 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
     self.vis_pos_emb = tf.reshape(sin_cos, [n_rows * n_cols, dim])
   else:
     raise ValueError('Unknown pos encoding %s' % pos_encoding)
+
+  tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
 
 
 def add_cls_token_emb(self, dim, name_prefix=None, initializer=None):
@@ -581,6 +585,7 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
     tf.print("First values after layer norm", tokens[0, :3, :3])
 
     tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
+    tf.print("Shape of position embeddings", self.vis_pos_emb[:3,:3])
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
     if self.use_cls_token:
