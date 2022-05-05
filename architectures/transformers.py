@@ -509,7 +509,7 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
       x_for_cache = x_ln = kv_ln = self.self_ln(x)
       
       if step == 0 and layer_idx == 0:
-        tf.print("Hidden states after layernorm:", x[0,:3,:3])
+        tf.print("Hidden states after layernorm:", x_ln[0,:3,:3])
       
       if cache is not None:  # Augment kv_ln with cache in (bsz, c_size, d).
         q_size, k_size = tf.shape(x)[1], tf.shape(cache)[1]
