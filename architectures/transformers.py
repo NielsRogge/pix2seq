@@ -373,6 +373,7 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
                mlp_ratio,
                drop_path=0.1,
                drop_units=0.,
+               print_values=False,
                **kwargs):
     super(MLP, self).__init__(**kwargs)
     self.num_layers = num_layers
@@ -388,10 +389,16 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
     ]
     self.dropp = DropPath(drop_path)
 
+    self.print_values = print_values
+
   def call(self, x, training, ret_list=False):
     x_list = [x]
     for i in range(self.num_layers):
       x_residual = self.mlp_layers[i](self.layernorms[i](x), training)
+
+      if self.print_values:
+        tf.print(f"First values of hidden states as residual:", x_residual[0,:3,:3])
+
       x = x + self.dropp(x_residual, training)
       x_list.append(x)
     return (x, x_list) if ret_list else x

@@ -67,7 +67,7 @@ class Model(tf.keras.models.Model):
           config.dim_att_dec, name_prefix='proj')
       if config.dec_proj_mode == 'mlp':
         self.proj_mlp = MLP(1, config.dim_att_dec, mlp_ratio, config.drop_path,
-                            config.drop_units, name='proj/mlp')
+                            config.drop_units, name='proj/mlp', print_values=True)
 
     self.decoder = AutoregressiveDecoder(
         config.vocab_size, config.max_seq_len, config.num_decoder_layers,
