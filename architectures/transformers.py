@@ -516,6 +516,10 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
         mask_self = tf.concat([tf.ones([1, 1, q_size, k_size]), mask_self], -1)
         kv_ln = tf.concat([cache, x_ln], axis=1)
       x_res = self.self_mha(x_ln, kv_ln, kv_ln, mask_self, training=training)
+      
+      if step == 0 and layer_idx == 0:
+        tf.print("Hidden states after self-attention:", x_res[0,:3,:3])
+      
       x = x + self.dropp(x_res, training)
     if self.cross_attention:
       x_ln = self.cross_ln(x)
