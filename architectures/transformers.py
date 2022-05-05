@@ -552,7 +552,7 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
       
       if i == 0:
         tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
-        tf.print(f"Encoder hidden states before layer {i}:", x[0,:3,:3])
+        tf.print(f"Encoder hidden states before layer {i}:", enc[0,:3,:3])
       
       x, x_for_cache = self.dec_layers[i](
           x, enc, cache, mask_self, mask_cross, training)
