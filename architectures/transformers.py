@@ -795,8 +795,6 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
     else:
       inp_embedding = self.inp_token_embedding
       outp_embedding = self.outp_token_embedding
-
-    tf.print("Shape of embeddings as input to decoder", inp_embedding.shape)
     
     # Each step reads caches[:step] and tokens[step:next_step] and updates
     # tokens[next_step], logits[next_step] and caches[step:next_step].
@@ -809,6 +807,10 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         x = x + seq_pos_emb[:, :prompt_len]  # (bsz, prompt_len, d)
         mask_self = 1. - get_ar_mask(prompt_len, x.dtype)
         caches_in = None
+      
+        tf.print("Shape of embeddings as input to decoder", x.shape)
+        tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
+      
       else:
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
