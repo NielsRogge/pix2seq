@@ -534,7 +534,7 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
     if step == 0 and layer_idx == 0:
         tf.print("Hidden states before MLP:", x[0,:3,:3])
     
-    x = self.mlp(x, training, step=step, layer_dix=layer_idx)
+    x = self.mlp(x, training, step=step, layer_idx=layer_idx)
     return x, x_for_cache
 
 
