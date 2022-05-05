@@ -373,7 +373,6 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
                mlp_ratio,
                drop_path=0.1,
                drop_units=0.,
-               print_values=False,
                **kwargs):
     super(MLP, self).__init__(**kwargs)
     self.num_layers = num_layers
@@ -389,20 +388,18 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
     ]
     self.dropp = DropPath(drop_path)
 
-    self.print_values = print_values
-
-  def call(self, x, training, ret_list=False):
+  def call(self, x, training, ret_list=False, step=None, layer_idx=None):
     
     z = self.layernorms[0](x)
 
-    if self.print_values:
+    if step == 0 and layer_idx == 0:
         tf.print(f"First values of hidden states after layernorm:", z[0,:3,:3])
     
     x_list = [x]
     for i in range(self.num_layers):
       x_residual = self.mlp_layers[i](self.layernorms[i](x), training)
 
-      if self.print_values:
+      if step == 0 and layer_idx == 0:
         tf.print(f"First values of hidden states as residual:", x_residual[0,:3,:3])
 
       x = x + self.dropp(x_residual, training)
@@ -533,7 +530,11 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
         tf.print("Hidden states after cross-attention:", x_res[0,:3,:3])
 
       x = x + self.dropp(x_res, training)
-    x = self.mlp(x, training)
+    
+    if step == 0 and layer_idx == 0:
+        tf.print("Hidden states before MLP:", x[0,:3,:3])
+    
+    x = self.mlp(x, training, step=step, layer_dix=layer_idx)
     return x, x_for_cache
 
 
