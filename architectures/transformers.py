@@ -579,6 +579,9 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
 
       presents.append(x_for_cache)
 
+    if step == 0:
+        tf.print(f"Hidden states after decoder:", x[0,:3,:3])
+    
     return x, tf.stack(presents)
 
 
