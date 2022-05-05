@@ -111,6 +111,10 @@ class Model(tf.keras.models.Model):
             [tf.zeros_like(vis_pos_emb[:, :1]), vis_pos_emb], 1)
       else:
         encoded = encoded + vis_pos_emb
+
+      tf.print(f"First values of encoded after position embeddings:", encoded[0,:3,:3])
+      tf.print(f"Last values of encoded after position embeddings:", encoded[0,-3:,-3:])
+
       if config.dec_proj_mode == 'mlp':
         encoded = self.proj_mlp(encoded, training)
       else:
