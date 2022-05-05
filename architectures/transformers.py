@@ -785,6 +785,8 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       logits (temperature-scaled) associated with sampled token, in shape of
         (bsz, max_seq_len-prompt_len, vocab_size).
     """
+    tf.print("Printing the prompt", prompt)
+    
     bsz, prompt_len = get_shape(prompt)
     seq_len = self.max_seq_len if max_seq_len is None else max_seq_len
     seq_pos_emb = tf.expand_dims(self.seq_pos_emb, 0)
@@ -794,6 +796,8 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       inp_embedding = self.inp_token_embedding
       outp_embedding = self.outp_token_embedding
 
+    tf.print("Shape of embeddings as input to decoder", inp_embedding.shape)
+    
     # Each step reads caches[:step] and tokens[step:next_step] and updates
     # tokens[next_step], logits[next_step] and caches[step:next_step].
     # On the first step, step=0, next_step=prompt_len. On subsequent steps
