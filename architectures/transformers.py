@@ -393,7 +393,7 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
 
   def call(self, x, training, ret_list=False):
     
-    z = self.layernorms[i](x)
+    z = self.layernorms[0](x)
 
     if self.print_values:
         tf.print(f"First values of hidden states after layernorm:", z[0,:3,:3])
