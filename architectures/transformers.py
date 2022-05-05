@@ -502,11 +502,14 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
     self.mlp = MLP(1, dim, mlp_ratio, drop_path, drop_units, name='mlp')
     self.dropp = DropPath(drop_path)
 
-  def call(self, x, enc, cache, mask_self, mask_cross, training, print_values=False):
+  def call(self, x, enc, cache, mask_self, mask_cross, training, step, layer_idx):
     """x in (bsz, seq, d), enc in (bsz, seq', d)."""
     x_for_cache = []
     if self.self_attention:
       x_for_cache = x_ln = kv_ln = self.self_ln(x)
+      
+      if step == 0 and layer_idx == 0:
+        tf.print("Hidden states after layernorm:", x[0,:3,:3])
       
       if cache is not None:  # Augment kv_ln with cache in (bsz, c_size, d).
         q_size, k_size = tf.shape(x)[1], tf.shape(cache)[1]
@@ -556,7 +559,7 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
         tf.print(f"Encoder hidden states before layer {i}:", enc[0,:3,:3])
       
       x, x_for_cache = self.dec_layers[i](
-          x, enc, cache, mask_self, mask_cross, training, print_values=i==0)
+          x, enc, cache, mask_self, mask_cross, training, step, i)
 
       if step == 0 and i == 0:
         tf.print(f"Hidden states after layer {i}:", x[0,:3,:3])
