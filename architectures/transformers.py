@@ -508,8 +508,6 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
     if self.self_attention:
       x_for_cache = x_ln = kv_ln = self.self_ln(x)
       
-      tf.print("Hidden states after layernorm:", x_ln[0,:3,:3])
-      
       if cache is not None:  # Augment kv_ln with cache in (bsz, c_size, d).
         q_size, k_size = tf.shape(x)[1], tf.shape(cache)[1]
         mask_self = tf.concat([tf.ones([1, 1, q_size, k_size]), mask_self], -1)
@@ -547,20 +545,20 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
         for i in range(num_layers)
     ]
 
-  def call(self, x, enc, caches, mask_self, mask_cross, training):
+  def call(self, x, enc, caches, mask_self, mask_cross, training, step):
     """x in (bsz, seq, d), enc in (bsz, seq', d)."""
     presents = []
     for i in range(self.num_layers):
       cache = None if caches is None else caches[i]
       
-      if i == 0:
+      if step == 0 and i == 0:
         tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
         tf.print(f"Encoder hidden states before layer {i}:", enc[0,:3,:3])
       
       x, x_for_cache = self.dec_layers[i](
           x, enc, cache, mask_self, mask_cross, training, print_values=i==0)
 
-      if i == 0:
+      if step == 0 and i == 0:
         tf.print(f"Hidden states after layer {i}:", x[0,:3,:3])
 
       presents.append(x_for_cache)
@@ -830,7 +828,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         mask_self = tf.ones([1, 1, 1, 1])
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
       outputs, caches_out = self.decoder(
-          x, encoded, caches_in, mask_self, None, training=False)
+          x, encoded, caches_in, mask_self, None, training=False, step)
       outputs = self.output_ln(outputs)
       next_logits = tf.matmul(  # only take the last for sampling next token.
           outputs, outp_embedding, transpose_b=True)[:, -1]
