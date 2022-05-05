@@ -523,7 +523,15 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
       x = x + self.dropp(x_res, training)
     if self.cross_attention:
       x_ln = self.cross_ln(x)
+
+      if step == 0 and layer_idx == 0:
+        tf.print("Hidden states after cross-attention layernorm:", x_ln[0,:3,:3])
+
       x_res = self.cross_mha(x_ln, enc, enc, mask_cross, training=training)
+
+      if step == 0 and layer_idx == 0:
+        tf.print("Hidden states after cross-attention:", x_res[0,:3,:3])
+
       x = x + self.dropp(x_res, training)
     x = self.mlp(x, training)
     return x, x_for_cache
