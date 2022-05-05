@@ -99,6 +99,10 @@ class Model(tf.keras.models.Model):
     config = self.config
     encoded = self.encoder(images, training)
     encoded = self.proj_ln(self.proj(encoded))
+    
+    tf.print(f"Shape of encoded after linear projection + ln:", encoded.shape)
+    tf.print(f"First values of encoded after linear projection + ln:", encoded[0,:3,:3])
+    
     # Add (optional) positional embedding to encoded visual units.
     if config.dec_proj_mode != 'linear':
       vis_pos_emb = tf.expand_dims(self.vis_pos_emb, 0)
@@ -111,6 +115,10 @@ class Model(tf.keras.models.Model):
         encoded = self.proj_mlp(encoded, training)
       else:
         assert config.dec_proj_mode == 'linear_p'
+    
+    tf.print(f"Shape of encoded after projection MLP:", encoded.shape)
+    tf.print(f"First values of encoded after projection MLP:", encoded[0,:3,:3])
+    
     return encoded
 
   def call(self, images, seq, training=True):
