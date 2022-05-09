@@ -509,9 +509,6 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
         tf.print("Hidden states after layernorm:", x_ln[0,:3,:3])
       
       if cache is not None:  # Augment kv_ln with cache in (bsz, c_size, d).
-        if step == 0 and layer_idx == 0:
-          tf.print("Cache before self-attention, step 0:", cache[0,:3,:3])
-
         if step == 1 and layer_idx == 0:
           tf.print("Cache before self-attention, step 1:", cache[0,:3,:3])
 
@@ -520,19 +517,18 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
         kv_ln = tf.concat([cache, x_ln], axis=1)
       
       if step == 1 and layer_idx == 0:
-        tf.print("Cache for step 1:", kv_ln[0,:3,:3])
+        tf.print("Shape of queries for self-attention:", x_ln.shape)
+        tf.print("Shape of keys + values for self-attention:", kv_ln.shape)
       
       x_res = self.self_mha(x_ln, kv_ln, kv_ln, mask_self, training=training)
-      
-      if step == 0 and layer_idx == 0:
-        tf.print("Hidden states after self-attention:", x_res[0,:3,:3])
       
       x = x + self.dropp(x_res, training)
     if self.cross_attention:
       x_ln = self.cross_ln(x)
 
-      if step == 0 and layer_idx == 0:
-        tf.print("Hidden states after cross-attention layernorm:", x_ln[0,:3,:3])
+      if step == 1 and layer_idx == 0:
+        tf.print("Shape of queries for cross-attention:", x_ln.shape)
+        tf.print("Shape of keys + values for cross-attention:", enc.shape)
 
       x_res = self.cross_mha(x_ln, enc, enc, mask_cross, training=training)
 
@@ -867,7 +863,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       
       tf.print(f"---- TIME STEP------- : {step}", x.shape)
       tf.print("Shape of embeddings as input to decoder", x.shape)
-      tf.print("First values of embeddings as input to decoder", x.shape)
+      tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
       if caches_in is not None:
         tf.print("Shape of caches_in:", caches_in.shape)
         tf.print("First values of caches_in:", caches_in[0,0,:3,:3])
