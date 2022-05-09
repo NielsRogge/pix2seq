@@ -873,14 +873,17 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       if step == 0:
         tf.print("Decoder outputs after output layernorm:", outputs[0,:3,:3])
 
-      next_logits = tf.matmul(  # only take the last for sampling next token.
-          outputs, outp_embedding, transpose_b=True)[:, -1]
+      next_logits = tf.matmul(outputs, outp_embedding, transpose_b=True)
+      
+      if step == 0:
+        tf.print("Shape of final logits:", next_logits.shape)
+      
+      next_logits = next_logits[:, -1] # only take the last for sampling next token.
       if self.output_bias:
         next_logits = tf.nn.bias_add(next_logits, self.outp_bias)
 
       if step == 0:
-        tf.print("Shape of final logits:", next_logits.shape)
-        tf.print("First values of final logits:", next_logits[0,:3])
+        tf.print("First values of final logits after bias:", next_logits[0,:3])
 
       # Scale and trunctate logits and sample next token.
       if sampling_callback:
@@ -891,6 +894,9 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         sampling_logits = top_logits(sampling_logits, k=top_k, p=top_p)
         next_token = tf.random.categorical(
             sampling_logits, num_samples=1, dtype=tf.int32)[:, 0]
+
+      if step == 0:
+        tf.print("Next token:", next_token)
 
       # Update internal states.
       next_step = step + (prompt_len if is_prompt else 1)
