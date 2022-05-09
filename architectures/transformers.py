@@ -573,24 +573,30 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
 
   def call(self, x, enc, caches, mask_self, mask_cross, training, step):
     """x in (bsz, seq, d), enc in (bsz, seq', d)."""
+    
+    tf.print(f"Shape of hidden states before decoder at time step {step}:", x.shape)
+    tf.print(f"Hidden states before decoder at time step {step}:", x[0,:3,:3])
+    if step != 0:
+      tf.print(f"Shape of caches before decoder at time step {step}:", caches.shape)
+    
     presents = []
     for i in range(self.num_layers):
       cache = None if caches is None else caches[i]
       
-      if step == 0 and i == 0:
-        tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
-        tf.print(f"Encoder hidden states before layer {i}:", enc[0,:3,:3])
+      # if step == 0 and i == 0:
+      #   tf.print(f"Hidden states before layer {i}:", x[0,:3,:3])
+      #   tf.print(f"Encoder hidden states before layer {i}:", enc[0,:3,:3])
       
       x, x_for_cache = self.dec_layers[i](
           x, enc, cache, mask_self, mask_cross, training, step, i)
 
-      if step == 0 and i == 0:
-        tf.print(f"Hidden states after layer {i}:", x[0,:3,:3])
+      # if step == 0 and i == 0:
+      #   tf.print(f"Hidden states after layer {i}:", x[0,:3,:3])
 
       presents.append(x_for_cache)
 
-    if step == 0:
-        tf.print(f"Hidden states after decoder:", x[0,:3,:3])
+    # if step == 0:
+    #     tf.print(f"Hidden states after decoder:", x[0,:3,:3])
     
     return x, tf.stack(presents)
 
