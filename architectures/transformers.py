@@ -848,6 +848,11 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False, step=step)
+      
+      tf.print("First values of decoder outputs:", outputs[0,:3,:3])
+      tf.print("Shape of caches_out:", caches_out.shape)
+      tf.print("First values of caches_out:", caches_out[0,:3,:3])
+      
       outputs = self.output_ln(outputs)
       next_logits = tf.matmul(  # only take the last for sampling next token.
           outputs, outp_embedding, transpose_b=True)[:, -1]
