@@ -933,4 +933,8 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
 
     sampled_tokens = tf.transpose(tokens_var[prompt_len:], [1, 0])
     sampled_tokens_logits = tf.transpose(logits_var[prompt_len:], [1, 0, 2])
+
+    tf.print("Shape of sampled tokens:", sampled_tokens.shape)
+    tf.print("Sampled tokens:", sampled_tokens.shape)
+
     return sampled_tokens, sampled_tokens_logits
