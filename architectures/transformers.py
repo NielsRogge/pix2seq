@@ -874,6 +874,9 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       if self.output_bias:
         next_logits = tf.nn.bias_add(next_logits, self.outp_bias)
 
+      if step == 0:
+        tf.print("Shape of final logits:", next_logits.shape)
+
       # Scale and trunctate logits and sample next token.
       if sampling_callback:
         next_token = sampling_callback(
