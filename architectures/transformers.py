@@ -851,6 +851,9 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
       
       else:
+        if step == 1:
+          tf.print("Tokens as input to decoder, step 1:", tokens)
+        
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
         x = tf.expand_dims(x, 1)  # (bsz, 1, d)
@@ -876,6 +879,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
 
       if step == 0:
         tf.print("Shape of final logits:", next_logits.shape)
+        tf.print("First values of final logits:", next_logits[0,:3])
 
       # Scale and trunctate logits and sample next token.
       if sampling_callback:
