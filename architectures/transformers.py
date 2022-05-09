@@ -842,6 +842,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
     def loop_body(step, caches, tokens, logits, is_prompt=False):
       if is_prompt:
         assert step == 0
+        tf.print("Tokens as input to decoder, step 1:", tokens.shape)
         x = tf.gather(inp_embedding, tf.transpose(tokens[:prompt_len]))
         x = x + seq_pos_emb[:, :prompt_len]  # (bsz, prompt_len, d)
         mask_self = 1. - get_ar_mask(prompt_len, x.dtype)
@@ -852,7 +853,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       
       else:
         if step == 1:
-          tf.print("Tokens as input to decoder, step 1:", tokens)
+          tf.print("Tokens as input to decoder, step 1:", tokens.shape)
         
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
