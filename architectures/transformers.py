@@ -865,6 +865,10 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         tf.print("First values of caches_out:", caches_out[0,:3,:3])
       
       outputs = self.output_ln(outputs)
+
+      if step == 0:
+        tf.print("Decoder outputs after output layernorm:", outputs[0,:3,:3])
+
       next_logits = tf.matmul(  # only take the last for sampling next token.
           outputs, outp_embedding, transpose_b=True)[:, -1]
       if self.output_bias:
