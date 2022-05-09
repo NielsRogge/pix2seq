@@ -842,7 +842,6 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
     def loop_body(step, caches, tokens, logits, is_prompt=False):
       if is_prompt:
         assert step == 0
-        tf.print("Tokens as input to decoder, step 0:", tokens.shape)
         x = tf.gather(inp_embedding, tf.transpose(tokens[:prompt_len]))
         x = x + seq_pos_emb[:, :prompt_len]  # (bsz, prompt_len, d)
         mask_self = 1. - get_ar_mask(prompt_len, x.dtype)
@@ -859,6 +858,12 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         x = tf.expand_dims(x, 1)  # (bsz, 1, d)
         mask_self = tf.ones([1, 1, 1, 1])
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
+      
+      if step == 1:
+        tf.print("TIME STEP = 1", x.shape)
+        tf.print("First values of embeddings as input to decoder", x.shape)
+        tf.print("First values of caches_in:", caches_in[0,0,:3,:3])
+      
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False, step=step)
       
@@ -894,8 +899,11 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         next_token = tf.random.categorical(
             sampling_logits, num_samples=1, dtype=tf.int32)[:, 0]
 
-      if step == 0:
-        tf.print("Next token:", next_token)
+        # IMPORTANT: we fix the token at time step 1
+        if step == 1:
+          next_token = tf.constant([1001], dtype=tf.int32)
+
+      tf.print(f"Next token at time step {step}:", next_token)
 
       # Update internal states.
       next_step = step + (prompt_len if is_prompt else 1)
@@ -938,8 +946,5 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
 
     sampled_tokens = tf.transpose(tokens_var[prompt_len:], [1, 0])
     sampled_tokens_logits = tf.transpose(logits_var[prompt_len:], [1, 0, 2])
-
-    tf.print("Shape of sampled tokens:", sampled_tokens.shape)
-    tf.print("Sampled tokens:", sampled_tokens.shape)
 
     return sampled_tokens, sampled_tokens_logits
