@@ -865,10 +865,11 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         mask_self = tf.ones([1, 1, 1, 1])
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
       
-      if step == 1:
-        tf.print("TIME STEP = 1", x.shape)
-        tf.print("First values of embeddings as input to decoder", x.shape)
-        tf.print("First values of caches_in:", caches_in[0,0,:3,:3])
+      tf.print(f"---- TIME STEP------- : {step}", x.shape)
+      tf.print("Shape of embeddings as input to decoder", x.shape)
+      tf.print("First values of embeddings as input to decoder", x.shape)
+      tf.print("Shape of caches_in:", caches_in.shape)
+      tf.print("First values of caches_in:", caches_in[0,0,:3,:3])
       
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False, step=step)
