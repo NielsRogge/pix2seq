@@ -852,8 +852,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
       
       else:
-        if step == 1:
-          tf.print(f"Tokens as input to decoder, step {step}:", tf.transpose(tokens[step]))
+        tf.print(f"Tokens as input to decoder, step {step}:", tf.transpose(tokens[step]))
         
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
