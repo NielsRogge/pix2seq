@@ -743,11 +743,13 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
     def loop_body(step, caches, tokens, logits, is_prompt=False):
       if is_prompt:
         assert step == 0
+        tf.print("Decoder input ID:", tf.transpose(tokens[:prompt_len]))
         x = tf.gather(inp_embedding, tf.transpose(tokens[:prompt_len]))
         x = x + seq_pos_emb[:, :prompt_len]  # (bsz, prompt_len, d)
         mask_self = 1. - get_ar_mask(prompt_len, x.dtype)
         caches_in = None
       else:
+        tf.print("Decoder input ID:", tf.transpose(tokens[step]))
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
         x = tf.expand_dims(x, 1)  # (bsz, 1, d)
@@ -760,10 +762,13 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False)
       outputs = self.output_ln(outputs)
-      next_logits = tf.matmul(  # only take the last for sampling next token.
-          outputs, outp_embedding, transpose_b=True)[:, -1]
+      next_logits = tf.matmul(outputs, outp_embedding, transpose_b=True)
+      
+      next_logits = next_logits[:, -1] # only take the last for sampling next token.
       if self.output_bias:
         next_logits = tf.nn.bias_add(next_logits, self.outp_bias)
+
+      tf.print("First values of final logits:", next_logits[0,:3])
 
       # Scale and trunctate logits and sample next token.
       if sampling_callback:
