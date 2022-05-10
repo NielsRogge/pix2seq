@@ -741,6 +741,8 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
     # On the first step, step=0, next_step=prompt_len. On subsequent steps
     # next_step = step + 1.
     def loop_body(step, caches, tokens, logits, is_prompt=False):
+      tf.print("-----------TIME STEP--------", step)
+      
       if is_prompt:
         assert step == 0
         tf.print("Decoder input ID:", tf.transpose(tokens[:prompt_len]))
@@ -756,11 +758,13 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         mask_self = tf.ones([1, 1, 1, 1])
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
       
-      tf.print("-----------TIME STEP--------", step)
       tf.print("First values of inputs_embeds:", x[0,:3,:3])
       
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False)
+      
+      tf.print("First values of decoder outputs:", outputs[0,:3,:3])
+      
       outputs = self.output_ln(outputs)
       next_logits = tf.matmul(outputs, outp_embedding, transpose_b=True)
       
