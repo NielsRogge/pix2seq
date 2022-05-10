@@ -574,6 +574,7 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
     tf.print(f"Hidden states before decoder at time step {step}:", x[0,:3,:3])
     if step != 0:
       tf.print(f"Shape of caches before decoder at time step {step}:", caches.shape)
+      tf.print(f"First values of caches before decoder at time step {step}:", caches.shape)
     
     presents = []
     for i in range(self.num_layers):
@@ -848,13 +849,7 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         x = x + seq_pos_emb[:, :prompt_len]  # (bsz, prompt_len, d)
         mask_self = 1. - get_ar_mask(prompt_len, x.dtype)
         caches_in = None
-      
-        tf.print("Shape of embeddings as input to decoder", x.shape)
-        tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
-      
-      else:
-        tf.print(f"Tokens as input to decoder, step {step}:", tf.transpose(tokens[step]))
-        
+      else:        
         x = tf.gather(inp_embedding, tf.transpose(tokens[step]))
         x = x + seq_pos_emb[:, step]  # (bsz, d)
         x = tf.expand_dims(x, 1)  # (bsz, 1, d)
@@ -862,8 +857,8 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         caches_in = tf.transpose(caches[:step], [1, 2, 0, 3])
       
       tf.print(f"---- TIME STEP------- : {step}", x.shape)
-      tf.print("Shape of embeddings as input to decoder", x.shape)
-      tf.print("First values of embeddings as input to decoder", x[0,:3,:3])
+      tf.print("Shape of inputs_embeds as input to decoder", x.shape)
+      tf.print("First values of inputs_embeds as input to decoder", x[0,:3,:3])
       if caches_in is not None:
         tf.print("Shape of caches_in:", caches_in.shape)
         tf.print("First values of caches_in:", caches_in[0,0,:3,:3])
@@ -871,21 +866,12 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
       outputs, caches_out = self.decoder(
           x, encoded, caches_in, mask_self, None, training=False, step=step)
       
-      if step == 0:
-        tf.print("First values of decoder outputs:", outputs[0,:3,:3])
-        tf.print("Shape of caches_out:", caches_out.shape)
-        tf.print("First values of caches_out:", caches_out[0,:3,:3])
+      tf.print("First values of decoder outputs:", outputs[0,:3,:3])
+      tf.print("Shape of caches_out:", caches_out.shape)
+      tf.print("First values of caches_out:", caches_out[0,:3,:3])
       
       outputs = self.output_ln(outputs)
-
-      if step == 0:
-        tf.print("Decoder outputs after output layernorm:", outputs[0,:3,:3])
-
-      next_logits = tf.matmul(outputs, outp_embedding, transpose_b=True)
-      
-      if step == 0:
-        tf.print("Shape of final logits:", next_logits.shape)
-      
+      next_logits = tf.matmul(outputs, outp_embedding, transpose_b=True)  
       next_logits = next_logits[:, -1] # only take the last for sampling next token.
       if self.output_bias:
         next_logits = tf.nn.bias_add(next_logits, self.outp_bias)
