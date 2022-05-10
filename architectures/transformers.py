@@ -132,14 +132,10 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
                     name_prefix=None, initializer=None):
   """Add vis_pos_emb variable/tensor to model instance referenced by `self`."""
   
-  tf.print("Position embedding:", pos_encoding)
-  
   if name_prefix is None:
     name_prefix = self.name
   if initializer is None:
     initializer = get_variable_initializer()
-  if pos_encoding == 'learned':
-    tf.print("we are using learned")
     
     self.vis_pos_emb = self.add_weight(
         shape=(n_rows * n_cols, dim), initializer=initializer,
@@ -148,16 +144,9 @@ def add_vis_pos_emb(self, pos_encoding, n_rows, n_cols, dim,
     sin_cos = get_2d_position_codes(
         n_rows, n_cols, dim, normalization_max=6.2831852)
     
-    tf.print("we are using sin/cos")
-    
-    tf.print("Shape of sin_cos", sin_cos.shape)
-    tf.print("First values of sin_cos", sin_cos[0, 0, 0, :3])
-    
     self.vis_pos_emb = tf.reshape(sin_cos, [n_rows * n_cols, dim])
   else:
     raise ValueError('Unknown pos encoding %s' % pos_encoding)
-
-  tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
 
 
 def add_cls_token_emb(self, dim, name_prefix=None, initializer=None):
@@ -392,15 +381,15 @@ class MLP(tf.keras.layers.Layer):  # pylint: disable=missing-docstring
     
     z = self.layernorms[0](x)
 
-    if step == 0 and layer_idx == 0:
-        tf.print(f"First values of hidden states after layernorm:", z[0,:3,:3])
+    # if step == 0 and layer_idx == 0:
+    #     tf.print(f"First values of hidden states after layernorm:", z[0,:3,:3])
     
     x_list = [x]
     for i in range(self.num_layers):
       x_residual = self.mlp_layers[i](self.layernorms[i](x), training)
 
-      if step == 0 and layer_idx == 0:
-        tf.print(f"First values of hidden states as residual:", x_residual[0,:3,:3])
+      # if step == 0 and layer_idx == 0:
+      #   tf.print(f"First values of hidden states as residual:", x_residual[0,:3,:3])
 
       x = x + self.dropp(x_residual, training)
       x_list.append(x)
@@ -457,15 +446,15 @@ class TransformerEncoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
   def call(self, x, mask, training, ret_list=False):
     x_list = [x]
     for i in range(self.num_layers):
-      if i in [0,11]:
-          tf.print(f"First values of hidden states before layer {i}:", x[0,:3,:3])
-          tf.print(f"Last values of hidden states before layer {i}:", x[0,-3:,-3:])
+      # if i in [0,11]:
+      #     tf.print(f"First values of hidden states before layer {i}:", x[0,:3,:3])
+      #     tf.print(f"Last values of hidden states before layer {i}:", x[0,-3:,-3:])
 
       x = self.enc_layers[i](x, mask, training)
 
-      if i in [0,11]:
-          tf.print(f"First values of hidden states after layer {i}:", x[0,:3,:3])
-          tf.print(f"Last values of hidden states after layer {i}:", x[0,-3:,-3:])
+      # if i in [0,11]:
+      #     tf.print(f"First values of hidden states after layer {i}:", x[0,:3,:3])
+      #     tf.print(f"Last values of hidden states after layer {i}:", x[0,-3:,-3:])
 
       x_list.append(x)
     return (x, x_list) if ret_list else x
@@ -505,20 +494,20 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
     if self.self_attention:
       x_for_cache = x_ln = kv_ln = self.self_ln(x)
       
-      if step == 0 and layer_idx == 0:
-        tf.print("Hidden states after layernorm:", x_ln[0,:3,:3])
+      # if step == 0 and layer_idx == 0:
+      #   tf.print("Hidden states after layernorm:", x_ln[0,:3,:3])
       
       if cache is not None:  # Augment kv_ln with cache in (bsz, c_size, d).
-        if step == 1 and layer_idx == 0:
-          tf.print("Cache before self-attention, step 1:", cache[0,:3,:3])
+        # if step == 1 and layer_idx == 0:
+        #   tf.print("Cache before self-attention, step 1:", cache[0,:3,:3])
 
         q_size, k_size = tf.shape(x)[1], tf.shape(cache)[1]
         mask_self = tf.concat([tf.ones([1, 1, q_size, k_size]), mask_self], -1)
         kv_ln = tf.concat([cache, x_ln], axis=1)
       
-      if step == 1 and layer_idx == 0:
-        tf.print("Shape of queries for self-attention:", x_ln.shape)
-        tf.print("Shape of keys + values for self-attention:", kv_ln.shape)
+      # if step == 1 and layer_idx == 0:
+      #   tf.print("Shape of queries for self-attention:", x_ln.shape)
+      #   tf.print("Shape of keys + values for self-attention:", kv_ln.shape)
       
       x_res = self.self_mha(x_ln, kv_ln, kv_ln, mask_self, training=training)
       
@@ -526,19 +515,19 @@ class TransformerDecoderLayer(tf.keras.layers.Layer):  # pylint: disable=missing
     if self.cross_attention:
       x_ln = self.cross_ln(x)
 
-      if step == 1 and layer_idx == 0:
-        tf.print("Shape of queries for cross-attention:", x_ln.shape)
-        tf.print("Shape of keys + values for cross-attention:", enc.shape)
+      # if step == 1 and layer_idx == 0:
+      #   tf.print("Shape of queries for cross-attention:", x_ln.shape)
+      #   tf.print("Shape of keys + values for cross-attention:", enc.shape)
 
       x_res = self.cross_mha(x_ln, enc, enc, mask_cross, training=training)
 
-      if step == 0 and layer_idx == 0:
-        tf.print("Hidden states after cross-attention:", x_res[0,:3,:3])
+      # if step == 0 and layer_idx == 0:
+      #   tf.print("Hidden states after cross-attention:", x_res[0,:3,:3])
 
       x = x + self.dropp(x_res, training)
     
-    if step == 0 and layer_idx == 0:
-        tf.print("Hidden states before MLP:", x[0,:3,:3])
+    # if step == 0 and layer_idx == 0:
+    #     tf.print("Hidden states before MLP:", x[0,:3,:3])
     
     x = self.mlp(x, training, step=step, layer_idx=layer_idx)
     return x, x_for_cache
@@ -570,11 +559,11 @@ class TransformerDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-docs
   def call(self, x, enc, caches, mask_self, mask_cross, training, step):
     """x in (bsz, seq, d), enc in (bsz, seq', d)."""
     
-    tf.print(f"Shape of hidden states before decoder at time step {step}:", x.shape)
-    tf.print(f"Hidden states before decoder at time step {step}:", x[0,:3,:3])
-    if step != 0:
-      tf.print(f"Shape of caches before decoder at time step {step}:", caches.shape)
-      tf.print(f"First values of caches before decoder at time step {step}:", caches.shape)
+    # tf.print(f"Shape of hidden states before decoder at time step {step}:", x.shape)
+    # tf.print(f"Hidden states before decoder at time step {step}:", x[0,:3,:3])
+    # if step != 0:
+    #   tf.print(f"Shape of caches before decoder at time step {step}:", caches.shape)
+    #   tf.print(f"First of caches before decoder at time step {step}:", caches.shape)
     
     presents = []
     for i in range(self.num_layers):
@@ -634,29 +623,29 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
 
   def call(self, images, training, ret_list=False):
     """Input images of (bsz, h, w, c)."""
-    tf.print("Shape of pixel values", images.shape)
-    tf.print("First values of pixel values", images[0, 0, 0, :3])
+    # tf.print("Shape of pixel values", images.shape)
+    # tf.print("First values of pixel values", images[0, 0, 0, :3])
 
     tokens = self.stem_conv(images)
 
-    tf.print("Shape of patch embeddings", tokens.shape)
-    tf.print("First values of patch embeddings", tokens[0, 0, 0, :3])
+    # tf.print("Shape of patch embeddings", tokens.shape)
+    # tf.print("First values of patch embeddings", tokens[0, 0, 0, :3])
 
     bsz, h, w, dim = get_shape(tokens)
     tokens = self.stem_ln(tf.reshape(tokens, [bsz, h * w, dim]))
 
-    tf.print("Shape of embeddings after layer norm", tokens.shape)
-    tf.print("First values after layer norm", tokens[0, :3, :3])
+    # tf.print("Shape of embeddings after layer norm", tokens.shape)
+    # tf.print("First values after layer norm", tokens[0, :3, :3])
 
-    tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
-    tf.print("Shape of position embeddings", self.vis_pos_emb[:3,:3])
+    # tf.print("Shape of position embeddings", self.vis_pos_emb.shape)
+    # tf.print("Shape of position embeddings", self.vis_pos_emb[:3,:3])
 
     tokens = tokens + tf.expand_dims(self.vis_pos_emb, 0)
 
-    tf.print("Shape after position embeddings", tokens.shape)
-    tf.print("First values after position embeddings", tokens[0, :3, :3])
-    tf.print("Last values after position embeddings:", tokens[0,-3:,:3:])
-    tf.print("Sum after position embeddings", tf.reduce_sum(tokens))
+    # tf.print("Shape after position embeddings", tokens.shape)
+    # tf.print("First values after position embeddings", tokens[0, :3, :3])
+    # tf.print("Last values after position embeddings:", tokens[0,-3:,:3:])
+    # tf.print("Sum after position embeddings", tf.reduce_sum(tokens))
 
     if self.use_cls_token:
       cls_token = tf.tile(tf.expand_dims(self.cls_token_emb, 0), [bsz, 1, 1])
@@ -666,8 +655,8 @@ class VisionTransformer(tf.keras.layers.Layer):  # pylint: disable=missing-docst
         tokens, None, training=training, ret_list=True)
     x = self.output_ln(tokens)
 
-    tf.print(f"Shape of final hidden states:", x.shape)
-    tf.print(f"First values of final hidden states:", x[0,:3,:3])
+    # tf.print(f"Shape of final hidden states:", x.shape)
+    # tf.print(f"First values of final hidden states:", x[0,:3,:3])
 
     return (x, x_list) if ret_list else x
 
