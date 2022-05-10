@@ -903,9 +903,9 @@ class AutoregressiveDecoder(tf.keras.layers.Layer):  # pylint: disable=missing-d
         next_token = tf.random.categorical(
             sampling_logits, num_samples=1, dtype=tf.int32)[:, 0]
 
-        # IMPORTANT: we fix the token at time step 1
-        if step == 1:
-          next_token = tf.constant([1001], dtype=tf.int32)
+      # IMPORTANT: we fix the next token at time step 1
+      if step == 0:
+        next_token = tf.constant([1113], dtype=tf.int32)
 
       tf.print(f"Next token at time step {step}:", next_token)
 
