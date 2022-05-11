@@ -213,6 +213,9 @@ class TaskObjectDetection(task_lib.Task):
           utils.tf_float32(unpadded_image_size))
       scale = scale * utils.tf_float32(orig_image_size)
       scale = tf.expand_dims(scale, 1)
+    
+    print("Scale:", scale)
+    
     pred_bboxes_rescaled = utils.scale_points(pred_bboxes, scale)
 
     gt_classes, gt_bboxes = labels['label'], labels['bbox']
